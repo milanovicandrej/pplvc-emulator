@@ -3,6 +3,16 @@
 using BYTE = unsigned char;
 using WORD = unsigned short;
 
+void cpu::LDA(){
+	reg_a = current_data;
+	if(reg_a == 0x00)
+		this->reg_status.Z = 1;
+
+	if((reg_a & 0x80) == 0x80)
+		this-> reg_status.N = 1; 
+
+}
+
 void cpu::step() {
 	size_t cycleCount = 0;
 	BYTE ins = bus->fetchByte(reg_pc);
@@ -26,7 +36,13 @@ void cpu::step() {
 		ZPX();
 		LDA();
 	}
-	else if (ins == 0xAD) {
+	else if (ins == 0xAD){
+		//LDA - ABS
+		cycleCount = 4;
+		ABS();
+		LDA();
+	}
+	else if (ins == 0x4C) {
 		//JMP - ABSOLUTE
 		ABS();
 		JMP();

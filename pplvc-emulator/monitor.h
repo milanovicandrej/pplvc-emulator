@@ -61,11 +61,21 @@ public:
 				WORD end = std::stoul(command[2], nullptr, 16);
 				hexDump(start, end);
 			}
+			else if(command[0] == "step"){
+				step();
+			}
+			else if(command[0] == "a"){
+				std::cout<<"REG_A : "<<HEX(this->processor->reg_a)<<std::endl;
+			}
 			else {
 				std::cout << "Command " << command[0] << " is invalid" << std::endl;
 			}
 		}
 
+	}
+
+	void step(){
+		processor->step();
 	}
 
 	void hexDump(WORD start, WORD end) {

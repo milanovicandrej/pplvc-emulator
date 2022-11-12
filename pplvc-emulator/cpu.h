@@ -16,6 +16,7 @@ struct STATUS {
 
 struct cpu
 {
+public:
 	using BYTE = unsigned char;
 	using WORD = unsigned short;
 
@@ -61,8 +62,7 @@ struct cpu
 	//instructions
 	
 		//load/store
-		void LDA() { reg_a = current_data; }
-		void LDX(); void LDY();
+		void LDA(); void LDX(); void LDY();
 		void STA(); void STX(); void STY();
 
 		//register transfers
@@ -109,7 +109,7 @@ struct cpu
 
 		//zero page
 		void ZP() {
-			BYTE addr = bus->fetchByte(reg_pc);
+			WORD addr = 0x00 + bus->fetchByte(reg_pc);
 			reg_pc++;
 			BYTE data = bus->fetchByte(addr);
 			abs_addr = addr;
@@ -118,7 +118,7 @@ struct cpu
 		
 		//zero page x
 		void ZPX() {
-			BYTE addr = bus->fetchByte(reg_pc);
+			WORD addr = 0x00 + bus->fetchByte(reg_pc);
 			reg_pc++;
 			addr += this->reg_x;
 			BYTE data = bus->fetchByte(addr);
@@ -128,7 +128,7 @@ struct cpu
 
 		//zero page y
 		void ZPY() {
-			BYTE addr = bus->fetchByte(reg_pc);
+			WORD addr = 0x00 + bus->fetchByte(reg_pc);
 			reg_pc++;
 			addr += this->reg_y;
 			BYTE data = bus->fetchByte(addr);
@@ -148,24 +148,55 @@ struct cpu
 			current_data = bus->fetchByte(addr);
 		}
 
-		WORD ABX() {
+		void ABX() {
 			BYTE lo = bus->fetchByte(reg_pc);
 			reg_pc++;
 			BYTE hi = bus->fetchByte(reg_pc);
 			reg_pc++;
 
-			WORD addr = ((hi << 8) | lo) + this->reg_x;
-			return bus->fetchByte(addr);
+			abs_addr = ((hi << 8) | lo) + this->reg_x;
+			current_data = bus->fetchByte(abs_addr);
 		}
 
-		WORD ABY() {
+		void ABY() {
 			BYTE lo = bus->fetchByte(reg_pc);
 			reg_pc++;
 			BYTE hi = bus->fetchByte(reg_pc);
 			reg_pc++;
 
-			WORD addr = ((hi << 8) | lo) + this->reg_y;
-			return bus->fetchByte(addr);
+			abs_addr = ((hi << 8) | lo) + this->reg_y;
+			current_data = bus->fetchByte(abs_addr);
+		}
+
+		void IND(){
+			BYTE lo = bus->fetchByte(reg_pc);
+			reg_pc++;
+			BYTE hi = bus->fetchByte(reg_pc);
+			reg_pc++;
+			WORD addr = (hi<<8) | lo;
+
+			BYTE lo_d = bus->fetchByte(addr);
+			BYTE hi_d = bus->fetchByte(addr + 1);
+
+			abs_addr = (hi_d << 8) | lo_d;
+			current_data = bus->fetchByte(abs_addr);
+		}
+
+		void INDX(){
+			WORD addr = 0x00 + bus->fetchByte(reg_pc);
+			reg_pc++;
+			addr = (addr + reg_x) & 0xFF;
+			BYTE lo = bus->fetchByte(addr);
+			BYTE hi = bus->fetchByte(addr + 1);
+			abs_addr = (hi<<8) | lo;
+			current_data = bus->fetchByte(abs_addr);
+		}
+
+		void INDY(){
+			WORD t = 0x00 + bus->fetchByte(reg_pc);
+			reg_pc++;
+			abs_addr = (bus->fetchByte(t) << 8) + bus->fetchByte(t + 1) + reg_y;
+			current_data = bus->fetchByte(abs_addr);
 		}
 
 	~cpu() {
