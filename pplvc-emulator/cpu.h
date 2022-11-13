@@ -1,16 +1,53 @@
 #pragma once
 #include <iostream>
+#include <map>
 #include <iomanip>
 #include "Bus.h"
 
+
+using BYTE = unsigned char;
+using WORD = unsigned short;
+
+struct Instruction{
+	int cycleCount;
+	void* addMode;
+	void* operation;
+	std::string mneu;
+	BYTE opcode;
+
+	Instruction(int cycleCount,void* addMode, void* operation, std::string mneu, BYTE opcode){
+		this->cycleCount = cycleCount;
+		this->addMode = addMode;
+		this->operation = operation;
+		this->mneu = mneu;
+		this->opcode = opcode;
+	}
+};
+
 struct STATUS {
-	int C = 0; //carry
-	int Z = 0; //zero
-	int I = 0; //int disable
-	int D = 0; //decimal mode
-	int B = 0; //break
-	int O = 0; //overflow
-	int N = 0; //negative
+	BYTE C = 0; //carry
+	BYTE Z = 0; //zero
+	BYTE I = 0; //disable
+	BYTE D = 0; //decimal mode
+	BYTE V = 0; //overflow
+	BYTE N = 0; //negative
+
+	BYTE getSTATUS(){
+		BYTE temp = 0x00
+			| C | (Z<<1) | (I<<2) | (D<<3) | (V<<6) | (N<<7)
+		;
+
+		return temp;
+	}
+
+	void setSTATUS(BYTE status){
+		C = status & 0b00000001;
+		Z = status & 0b00000010;
+		I = status & 0b00000100;
+		D = status & 0b00001000;
+		V = status & 0b01000000;
+		N = status & 0b10000000;
+	}
 };
 
 
@@ -27,6 +64,8 @@ public:
 
 	Bus* bus;
 	
+	std::map<BYTE,Instruction>* m_instructionSet;
+
 	//registers
 	WORD reg_pc;
 	BYTE reg_sp;
@@ -43,6 +82,8 @@ public:
 		m_stopFlag = false;
 		bus = new Bus();
 
+		m_instructionSet = new std::map<BYTE,Instruction>;
+
 		abs_addr = 0x00;
 		current_data = 0x00;
 
@@ -52,8 +93,10 @@ public:
 	void step();
 
 	void reset() {
-		reg_pc = 0xFFFC;
-		reg_sp = 0xFF;
+		BYTE lo = bus->fetchByte(0xFFFC);
+		BYTE hi = bus->fetchByte(0xFFFD);
+		reg_pc = (hi<<8) | lo;
+		reg_sp = 0x01FF;
 		reg_a = 0x00;
 		reg_x = 0x00;
 		reg_y = 0x00;
@@ -62,29 +105,30 @@ public:
 	//instructions
 	
 		//load/store
-		void LDA(); void LDX(); void LDY();
-		void STA(); void STX(); void STY();
+		void LDA(); void LDX(); void LDY(); //done
+
+		void STA(); void STX(); void STY(); //done
 
 		//register transfers
-		void TAX(); void TAY(); void TXA(); void TYA();
+		void TAX(); void TAY(); void TXA(); void TYA(); //done
 
 		//stack operations
-		void TSX(); void TXS(); void PHA(); void PHP(); void PLA(); void PLP();
+		void TSX(); void TXS(); void PHA(); void PHP(); void PLA(); void PLP(); //done
 
 		//logical
-		void AND(); void EOR(); void ORA(); void BIT();
+		void AND(); void EOR(); void ORA(); void BIT(); //done
 
 		//arithemetic
-		void ADC(); void SBC(); void CMP(); void CPX(); void CPY();
+		void ADC(); void SBC(); void CMP(); void CPX(); void CPY(); //done
 
 		// inc and dec
-		void INC(); void INX(); void INY(); void DEC(); void DEX(); void DEY();
+		void INC(); void INX(); void INY(); void DEC(); void DEX(); void DEY(); //done 
 
 		//shifts
-		void ASL(); void LSR(); void ROL(); void ROR();
+		void ASL(bool isMem); void LSR(bool isMem); void ROL(bool isMem); void ROR(bool isMem); // done
 		
 		//jumps and calls
-		void JMP() { reg_pc = abs_addr; } void JSR(); void RTS();
+		void JMP(); void JSR(); void RTS(); //done
 
 		//branches 
 		void BCC(); void BCS(); void BEQ(); void BMI(); void BNE(); void BPL(); void BVC(); void BVS();
@@ -93,7 +137,7 @@ public:
 		void CLC(); void CLD(); void CLI(); void CLV(); void SEC(); void SED(); void SEI();
 
 		//system funcs
-		void BRK(); void NOP() { return; } void RTI();
+		void BRK(); void NOP(); void RTI();
 
 
 	//addressing modes
@@ -201,6 +245,8 @@ public:
 
 	~cpu() {
 		delete bus;
+		m_instructionSet->clear();
+		delete m_instructionSet;
 	}
 };
 

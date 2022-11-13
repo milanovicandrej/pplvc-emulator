@@ -65,7 +65,10 @@ public:
 				step();
 			}
 			else if(command[0] == "a"){
-				std::cout<<"REG_A : "<<HEX(this->processor->reg_a)<<std::endl;
+				std::cout<<"REG_A : "<<HEX(processor->reg_a)<<std::endl;
+			}
+			else if(command[0] == "pc"){
+				std::cout<<"PC : "<<HEX(processor->reg_pc)<<" -> ("<<HEX(processor->bus->fetchByte(processor->reg_pc))<<")"<<std::endl;
 			}
 			else {
 				std::cout << "Command " << command[0] << " is invalid" << std::endl;
