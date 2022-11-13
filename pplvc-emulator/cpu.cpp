@@ -321,6 +321,8 @@ void cpu::RTS(){
 
 void cpu::BCC(){}
 
+void cpu::BCS(){}
+
 //execute one instruction
 void cpu::step() {
 	size_t cycleCount = 0;
