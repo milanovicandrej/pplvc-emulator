@@ -319,7 +319,7 @@ void cpu::RTS(){
 	reg_pc = (hi << 8)|lo;
 }
 
-
+void cpu::BCC(){}
 
 //execute one instruction
 void cpu::step() {
