@@ -96,7 +96,7 @@ public:
 		BYTE lo = bus->fetchByte(0xFFFC);
 		BYTE hi = bus->fetchByte(0xFFFD);
 		reg_pc = (hi<<8) | lo;
-		reg_sp = 0x01FF;
+		reg_sp = 0xFF;
 		reg_a = 0x00;
 		reg_x = 0x00;
 		reg_y = 0x00;

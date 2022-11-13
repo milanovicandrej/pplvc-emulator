@@ -76,26 +76,26 @@ void cpu::TXS(){
 }
 
 void cpu::PHA(){
-	bus->writeByte(reg_sp,reg_a);
-	if(reg_sp > 0x100)
+	bus->writeByte(0x0100 + reg_sp,reg_a);
+	if(reg_sp > 0x00)
 		reg_sp--;
 }
 
 void cpu::PHP(){
-	bus->writeByte(reg_sp,reg_status.getSTATUS());
-	if(reg_sp > 0x100)
+	bus->writeByte(0x0100 + reg_sp,reg_status.getSTATUS());
+	if(reg_sp > 0x00)
 		reg_sp--;
 }
 
 void cpu::PLA(){
-	reg_a = bus->fetchByte(reg_sp);
-	if(reg_sp < 0x1FF)
+	reg_a = bus->fetchByte(0x100 + reg_sp);
+	if(reg_sp < 0xFF)
 		reg_sp++;
 }
 
 void cpu::PLP(){
-	reg_status.setSTATUS(bus->fetchByte(reg_sp));
-	if(reg_sp < 0x1FF)
+	reg_status.setSTATUS(bus->fetchByte(0x100 + reg_sp));
+	if(reg_sp < 0xFF)
 		reg_sp++;
 }
 
@@ -292,13 +292,13 @@ void cpu::JSR(){
 	BYTE lo = reg_pc & 0x00FF;
 	BYTE hi = reg_pc >> 8 & 0x00FF;
 
-	bus->writeByte(reg_sp,hi);
-	if(reg_sp > 0x100)
+	bus->writeByte(0x0100 + reg_sp,hi);
+	if(reg_sp > 0x00)
 		reg_sp--;
 	
 	
-	bus->writeByte(reg_sp,lo);
-	if(reg_sp > 0x100)
+	bus->writeByte(0x0100 + reg_sp,lo);
+	if(reg_sp > 0x00)
 		reg_sp--;
 
 	reg_pc = abs_addr;
@@ -306,12 +306,12 @@ void cpu::JSR(){
 
 void cpu::RTS(){
 
-	BYTE lo = bus->fetchByte(reg_sp);
-	if(reg_sp < 0x1FF)
+	BYTE lo = bus->fetchByte(0x0100 + reg_sp);
+	if(reg_sp < 0xFF)
 		reg_sp++;
 
-	BYTE hi = bus->fetchByte(reg_sp);
-	if(reg_sp < 0x1FF)
+	BYTE hi = bus->fetchByte(0x0100 + reg_sp);
+	if(reg_sp < 0xFF)
 		reg_sp++;
 
 	PLP();
