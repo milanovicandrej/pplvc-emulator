@@ -20,6 +20,7 @@ public:
 				return devices[i]->read(addr);
 			}
 		}
+		return 0x00;
 	}
 
 	void writeByte(WORD addr, BYTE data) {

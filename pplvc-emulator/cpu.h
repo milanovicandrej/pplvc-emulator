@@ -8,22 +8,6 @@
 using BYTE = unsigned char;
 using WORD = unsigned short;
 
-struct Instruction{
-	int cycleCount;
-	void* addMode;
-	void* operation;
-	std::string mneu;
-	BYTE opcode;
-
-	Instruction(int cycleCount,void* addMode, void* operation, std::string mneu, BYTE opcode){
-		this->cycleCount = cycleCount;
-		this->addMode = addMode;
-		this->operation = operation;
-		this->mneu = mneu;
-		this->opcode = opcode;
-	}
-};
-
 struct STATUS {
 	BYTE C = 0; //carry
 	BYTE Z = 0; //zero
@@ -57,6 +41,16 @@ public:
 	using BYTE = unsigned char;
 	using WORD = unsigned short;
 
+	
+	struct Instruction{
+		int cycleCount = 2;
+		void (cpu::*addMode)() = nullptr;
+		void (cpu::*operation)() = nullptr;
+		std::string mneu = "";
+		BYTE opcode = 0x00;
+	};
+
+
 	bool m_stopFlag;
 
 	//macro parameters
@@ -64,7 +58,7 @@ public:
 
 	Bus* bus;
 	
-	std::map<BYTE,Instruction>* m_instructionSet;
+	std::map<BYTE,Instruction> m_instructionSet;
 
 	//registers
 	WORD reg_pc;
@@ -82,8 +76,6 @@ public:
 		m_stopFlag = false;
 		bus = new Bus();
 
-		m_instructionSet = new std::map<BYTE,Instruction>;
-
 		abs_addr = 0x00;
 		current_data = 0x00;
 
@@ -91,16 +83,8 @@ public:
 	}
 
 	void step();
-
-	void reset() {
-		BYTE lo = bus->fetchByte(0xFFFC);
-		BYTE hi = bus->fetchByte(0xFFFD);
-		reg_pc = (hi<<8) | lo;
-		reg_sp = 0xFF;
-		reg_a = 0x00;
-		reg_x = 0x00;
-		reg_y = 0x00;
-	}
+	void initInsSet();
+	void reset();
 
 	//instructions
 	
@@ -245,8 +229,6 @@ public:
 
 	~cpu() {
 		delete bus;
-		m_instructionSet->clear();
-		delete m_instructionSet;
 	}
 };
 

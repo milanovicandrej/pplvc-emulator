@@ -70,6 +70,9 @@ public:
 			else if(command[0] == "pc"){
 				std::cout<<"PC : "<<HEX(processor->reg_pc)<<" -> ("<<HEX(processor->bus->fetchByte(processor->reg_pc))<<")"<<std::endl;
 			}
+			else if(command[0] == "sp"){
+				std::cout<<"PC : "<<HEX(processor->reg_sp)<<" -> ("<<HEX(processor->bus->fetchByte(0x0100 + processor->reg_sp))<<")"<<std::endl;
+			}
 			else {
 				std::cout << "Command " << command[0] << " is invalid" << std::endl;
 			}

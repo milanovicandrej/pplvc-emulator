@@ -323,45 +323,40 @@ void cpu::BCC(){}
 
 void cpu::BCS(){}
 
+void cpu::reset() {
+		BYTE lo = bus->fetchByte(0xFFFC);
+		BYTE hi = bus->fetchByte(0xFFFD);
+		reg_pc = (hi<<8) | lo;
+		reg_sp = 0xFF;
+		reg_a = 0x00;
+		reg_x = 0x00;
+		reg_y = 0x00;
+
+		initInsSet();
+}
+
+void cpu::initInsSet(){
+
+	m_instructionSet[0xA9] = {2,&cpu::IMM,&cpu::LDA,"LDA",0xA9};
+	m_instructionSet[0xA5] = {3,&cpu::ZP,&cpu::LDA,"LDA",0xA9};
+	m_instructionSet[0xB5] = {4,&cpu::ZPX,&cpu::LDA,"LDA",0xA9};
+	m_instructionSet[0xAD] = {4,&cpu::ABS,&cpu::LDA,"LDA",0xA9};
+	m_instructionSet[0x4C] = {2,&cpu::ABS,&cpu::JMP,"JMP",0xA9};
+	m_instructionSet[0x48] = {2,nullptr,&cpu::PHA,"PHA",0xA9};
+}
+
 //execute one instruction
 void cpu::step() {
 	size_t cycleCount = 0;
-	BYTE ins = bus->fetchByte(reg_pc);
+	BYTE opcode = bus->fetchByte(reg_pc);
 	reg_pc++;
-
-	if (ins == 0xA9) {
-		//LDA - Imm
-		cycleCount = 2;
-		IMM();
-		LDA();
-	}
-	else if (ins == 0xA5) {
-		//LDA - ZP
-		cycleCount = 3;
-		ZP();
-		LDA();
-	}
-	else if (ins == 0xB5) {
-		//LDA - ZPX
-		cycleCount = 4;
-		ZPX();
-		LDA();
-	}
-	else if (ins == 0xAD){
-		//LDA - ABS
-		cycleCount = 4;
-		ABS();
-		LDA();
-	}
-	else if (ins == 0x4C) {
-		//JMP - ABSOLUTE
-		ABS();
-		JMP();
-	}
-	else {
-		NOP();
-		cycleCount = 1;
-	}
 	
-	//waiting mechanism to be in time with clock
+	cycleCount = m_instructionSet[opcode].cycleCount;
+
+	if(m_instructionSet[opcode].addMode != nullptr){
+		(this->*m_instructionSet[opcode].addMode)();
+	}
+
+	(this->*m_instructionSet[opcode].operation)();
+
 }

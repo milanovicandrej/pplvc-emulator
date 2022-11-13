@@ -10,8 +10,8 @@ int main()
 {
 	cpu cpu(1024);
 
-	ram zeroPage(0x00, 0xFF);
-	ram stack(0x1000, 0xFF);
+	ram zeroPage(0x00, 256);
+	ram stack(0x0100, 256);
 	rom rom(0xE000, 8192);
 
 	//testing
