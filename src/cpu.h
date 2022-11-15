@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
-#include <map>
-#include <iomanip>
+#include <vector>
 #include "Bus.h"
 
 
@@ -58,7 +57,7 @@ public:
 
 	Bus* bus;
 	
-	std::map<BYTE,Instruction> m_instructionSet;
+	std::vector<Instruction> m_instructionSet;
 
 	//registers
 	WORD reg_pc;
@@ -115,13 +114,13 @@ public:
 		void JMP(); void JSR(); void RTS(); //done
 
 		//branches 
-		void BCC(); void BCS(); void BEQ(); void BMI(); void BNE(); void BPL(); void BVC(); void BVS();
+		void BCC(); void BCS(); void BEQ(); void BMI(); void BNE(); void BPL(); void BVC(); void BVS(); //done
 
 		//status flag changes
-		void CLC(); void CLD(); void CLI(); void CLV(); void SEC(); void SED(); void SEI();
+		void CLC(); void CLD(); void CLI(); void CLV(); void SEC(); void SED(); void SEI();//done
 
 		//system funcs
-		void BRK(); void NOP(); void RTI();
+		void BRK(); void NOP(); void RTI();//done
 
 
 	//addressing modes
@@ -152,6 +151,11 @@ public:
 			BYTE data = bus->fetchByte(addr);
 			abs_addr = addr;
 			current_data = data;
+		}
+
+		void REL(){
+			BYTE offset = bus->fetchByte(reg_pc);
+			current_data = offset;
 		}
 
 		//zero page y

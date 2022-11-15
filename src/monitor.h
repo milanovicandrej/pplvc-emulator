@@ -1,13 +1,14 @@
 #pragma once
 #include "cpu.h"
 #include <string>
+#include <iomanip>
 
 #define HEX( x ) std::setw(2) << std::setfill('0') << std::hex << (int)(x)
 
 std::vector<std::string> split(std::string str, std::string token) {
 	std::vector<std::string>result;
 	while (str.size()) {
-		int index = str.find(token);
+		size_t index = str.find(token);
 		if (index != std::string::npos) {
 			result.push_back(str.substr(0, index));
 			str = str.substr(index + token.size());

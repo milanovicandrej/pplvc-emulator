@@ -15,7 +15,7 @@ public:
 	}
 
 	BYTE fetchByte(WORD addr) {
-		for (int i = 0; i < devices.size(); i++) {
+		for (size_t i = 0; i < devices.size(); i++) {
 			if (addr >= devices[i]->m_startAddr && addr < devices[i]->m_startAddr + devices[i]->range) {
 				return devices[i]->read(addr);
 			}
@@ -24,7 +24,7 @@ public:
 	}
 
 	void writeByte(WORD addr, BYTE data) {
-		for (int i = 0; i < devices.size(); i++) {
+		for (size_t i = 0; i < devices.size(); i++) {
 			if (addr >= devices[i]->m_startAddr && addr < devices[i]->m_startAddr + devices[i]->range) {
 				devices[i]->write(addr, data);
 				return;

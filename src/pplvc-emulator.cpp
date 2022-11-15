@@ -15,7 +15,7 @@ int main()
 	rom rom(0xE000, 8192);
 
 	//testing
-	rom.openFile("../../roms/rom_v1.bin");
+	rom.openFile("./roms/rom_v1.bin");
 
 	//connection
 	cpu.bus->addDevice(&zeroPage);
