@@ -108,8 +108,10 @@ public:
 		void INC(); void INX(); void INY(); void DEC(); void DEX(); void DEY(); //done 
 
 		//shifts
-		void ASL(bool isMem); void LSR(bool isMem); void ROL(bool isMem); void ROR(bool isMem); // done
-		
+		void ASL(); void LSR(); void ROL(); void ROR(); // done
+		void ASL_A(); void LSR_A(); void ROL_A();void ROR_A();//done
+
+
 		//jumps and calls
 		void JMP(); void JSR(); void RTS(); //done
 

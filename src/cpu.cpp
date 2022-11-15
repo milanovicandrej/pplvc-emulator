@@ -210,38 +210,37 @@ void cpu::DEY(){
 	reg_status.N = (reg_y & 0b10000000) >> 7;
 }
 
-void cpu::ASL(bool isMem){
-	if(isMem){
+void cpu::ASL(){
 		reg_status.C = (current_data & 0b10000000) >> 7;
 		current_data = current_data << 1;
 		bus->writeByte(abs_addr,current_data);
 		reg_status.Z = current_data == 0;
 		reg_status.N = (current_data & 0b10000000) >> 7;
-	}else{
+}
+
+void cpu::ASL_A(){
 		reg_status.C = (reg_a & 0b10000000) >> 7;
 		reg_a = reg_a << 1;
 		reg_status.Z = reg_a == 0;
 		reg_status.N = (reg_a & 0b10000000) >> 7;
-	}
 }
 
-void cpu::LSR(bool isMem){
-	if(isMem){
+void cpu::LSR(){
 		reg_status.C = current_data & 0b00000001;
 		current_data = current_data / 2;
 		bus->writeByte(abs_addr,current_data);
 		reg_status.Z = current_data == 0;
 		reg_status.N = (current_data & 0b10000000) >> 7;
-	}else{
+}
+
+void cpu::LSR_A(){
 		reg_status.C = reg_a & 0b10000001;
 		reg_a = reg_a / 2;
 		reg_status.Z = reg_a == 0;
 		reg_status.N = (reg_a & 0b10000000) >> 7;
-	}
 }
 
-void cpu::ROL(bool isMem){
-	if(isMem){
+void cpu::ROL(){
 		BYTE oldseven = (current_data & 0b10000000) >> 7;
 
 		current_data = (current_data << 1) | reg_status.C;
@@ -249,20 +248,19 @@ void cpu::ROL(bool isMem){
 		reg_status.C = oldseven;
 		
 		reg_status.Z = current_data == 0;
-		reg_status.N = (current_data & 0b10000000) >> 7;
-	}else{
+		reg_status.N = (current_data & 0b10000000) >> 7;	
+}
+
+void cpu::ROL_A(){
 		BYTE oldseven = (reg_a & 0b10000000) >> 7;
 
 		reg_a = (reg_a << 1) | reg_status.C;
 		reg_status.C = oldseven;
 		reg_status.Z = reg_a == 0;
 		reg_status.N = (reg_a & 0b10000000) >> 7;
-	}	
 }
 
-void cpu::ROR(bool isMem){
-	if(isMem){
-
+void cpu::ROR(){
 		BYTE oldzero = (current_data & 0b00000001);
 		
 		current_data = (current_data >> 1) | (reg_status.C << 7);
@@ -272,8 +270,10 @@ void cpu::ROR(bool isMem){
 
 		reg_status.Z = current_data == 0;
 		reg_status.N = (reg_a & 0b10000000) >> 7;
-	}else{
 
+}
+
+void cpu::ROR_A(){
 		BYTE oldzero = (reg_a & 0b00000001);
 		
 		reg_a = (reg_a >> 1) | (reg_status.C << 7);
@@ -282,7 +282,6 @@ void cpu::ROR(bool isMem){
 		
 		reg_status.Z = reg_a == 0;
 		reg_status.N = (reg_a & 0b10000000) >> 7;
-	}
 }
 
 void cpu::JMP(){ reg_pc = abs_addr; }
@@ -445,16 +444,135 @@ void cpu::initInsSet(){
 	m_instructionSet[0x65] = {3,&cpu::ZP,&cpu::ADC,"ADC",0x65};
 	m_instructionSet[0x75] = {4,&cpu::ZPX,&cpu::ADC,"ADC",0x75};
 	m_instructionSet[0x6D] = {4,&cpu::ABS,&cpu::ADC,"ADC",0x6D};
-	//m_instructionSet[0xA9] = {2,&cpu::IMM,&cpu::ADC,"ADC",0xA9};
-	//m_instructionSet[0xA9] = {2,&cpu::IMM,&cpu::ADC,"ADC",0xA9};
-	//m_instructionSet[0xA9] = {2,&cpu::IMM,&cpu::ADC,"ADC",0xA9};
-	//m_instructionSet[0xA9] = {2,&cpu::IMM,&cpu::ADC,"ADC",0xA9};
+	m_instructionSet[0x7D] = {4,&cpu::ABX,&cpu::ADC,"ADC",0x7D};
+	m_instructionSet[0x79] = {4,&cpu::ABY,&cpu::ADC,"ADC",0x79};
+	m_instructionSet[0x61] = {6,&cpu::INDX,&cpu::ADC,"ADC",0x61};
+	m_instructionSet[0x71] = {5,&cpu::INDY,&cpu::ADC,"ADC",0x71};
 
+	//AND
+	m_instructionSet[0x29] = {2,&cpu::IMM,&cpu::AND,"AND",0x29};
+	m_instructionSet[0x25] = {3,&cpu::ZP,&cpu::AND,"AND",0x25};
+	m_instructionSet[0x35] = {4,&cpu::ZPX,&cpu::AND,"AND",0x35};
+	m_instructionSet[0x2D] = {4,&cpu::ABS,&cpu::AND,"AND",0x2D};
+	m_instructionSet[0x3D] = {4,&cpu::ABX,&cpu::AND,"AND",0x3D};
+	m_instructionSet[0x39] = {4,&cpu::ABY,&cpu::AND,"AND",0x39};
+	m_instructionSet[0x21] = {6,&cpu::INDX,&cpu::AND,"AND",0x21};
+	m_instructionSet[0x31] = {5,&cpu::INDY,&cpu::AND,"AND",0x31};
+
+	//ASL
+	m_instructionSet[0x0A] = {2,nullptr,&cpu::ASL_A,"ASL",0x0A};
+	m_instructionSet[0x06] = {5,&cpu::ZP,&cpu::ASL,"ASL",0x06};
+	m_instructionSet[0x16] = {6,&cpu::ZPX,&cpu::ASL,"ASL",0x16};
+	m_instructionSet[0x0E] = {6,&cpu::ABS,&cpu::ASL,"ASL",0x0E};
+	m_instructionSet[0x1E] = {7,&cpu::ABX,&cpu::ASL,"ASL",0x1E};
+
+	//BCC
+	m_instructionSet[0x90] = {2,&cpu::REL,&cpu::BCC,"BCC",0x90};
+	//BCS
+	m_instructionSet[0xB0] = {2,&cpu::REL,&cpu::BCS,"BCS",0xB0};
+	//BEQ
+	m_instructionSet[0xF0] = {2,&cpu::REL,&cpu::BCS,"BCS",0xF0};
+	//BIT
+	m_instructionSet[0x24] = {2,&cpu::ZP,&cpu::BIT,"BIT",0x24};
+	m_instructionSet[0x2C] = {2,&cpu::ABS,&cpu::BIT,"BIT",0x2C};
+	//BMI
+	m_instructionSet[0x30] = {2,&cpu::REL,&cpu::BMI,"BMI",0x30};
+	//BNE
+	m_instructionSet[0xD0] = {2,&cpu::REL,&cpu::BNE,"BNE",0xD0};
+	//BPL
+	m_instructionSet[0x10] = {2,&cpu::REL,&cpu::BPL,"BPL",0x10};
+	//BRK
+	m_instructionSet[0x00] = {7,nullptr,&cpu::BRK,"BRK",0x00};
+	//BVC
+	m_instructionSet[0x50] = {2,&cpu::REL,&cpu::BVC,"BVC",0x50};
+	//BVS
+	m_instructionSet[0x70] = {2,&cpu::REL,&cpu::BVS,"BVS",0x70};
+
+
+	//CLC
+	m_instructionSet[0x18] = {2,nullptr,&cpu::CLC,"CLC",0x18};
+	//CLD
+	m_instructionSet[0xD8] = {2,nullptr,&cpu::CLD,"CLD",0xD8};
+	//CLI
+	m_instructionSet[0x58] = {2,nullptr,&cpu::CLI,"CLI",0x58};
+	//CLV
+	m_instructionSet[0xB8] = {2,nullptr,&cpu::CLV,"CLV",0xB8};
+
+	//CMP
+	m_instructionSet[0xC9] = {2,&cpu::IMM,&cpu::CMP,"CMP",0xC9};
+	m_instructionSet[0xC5] = {3,&cpu::ZP,&cpu::CMP,"CMP",0xC5};
+	m_instructionSet[0xD5] = {4,&cpu::ZPX,&cpu::CMP,"CMP",0xD5};
+	m_instructionSet[0xCD] = {4,&cpu::ABS,&cpu::CMP,"CMP",0xCD};
+	m_instructionSet[0xDD] = {4,&cpu::ABX,&cpu::CMP,"CMP",0xDD};
+	m_instructionSet[0xD9] = {4,&cpu::ABY,&cpu::CMP,"CMP",0xD9};
+	m_instructionSet[0xC1] = {6,&cpu::INDX,&cpu::CMP,"CMP",0xC1};
+	m_instructionSet[0xD1] = {5,&cpu::INDY,&cpu::CMP,"CMP",0xD1};
+
+	//CPX
+	m_instructionSet[0xE0] = {2,&cpu::IMM,&cpu::CPX,"CPX",0xE0};
+	m_instructionSet[0xE4] = {3,&cpu::ZP,&cpu::CPX,"CPX",0xE4};
+	m_instructionSet[0xEC] = {4,&cpu::ABS,&cpu::CPX,"CPX",0xEC};
+
+	//CPY
+	m_instructionSet[0xC0] = {2,&cpu::IMM,&cpu::CPY,"CPY",0xC0};
+	m_instructionSet[0xC4] = {3,&cpu::ZP,&cpu::CPY,"CPY",0xC4};
+	m_instructionSet[0xCC] = {4,&cpu::ABS,&cpu::CPY,"CPY",0xCC};	
+
+	//DEC
+	m_instructionSet[0xC6] = {5,&cpu::ZP,&cpu::DEC,"DEC",0xC6};
+	m_instructionSet[0xD6] = {6,&cpu::ZPX,&cpu::DEC,"DEC",0xD6};
+	m_instructionSet[0xCE] = {6,&cpu::ABS,&cpu::DEC,"DEC",0xCE};
+	m_instructionSet[0xDE] = {7,&cpu::ABX,&cpu::DEC,"DEC",0xDE};
+
+	//DEX
+	m_instructionSet[0xCA] = {2,nullptr,&cpu::DEX,"DEX",0xCA};
+
+	//DEY
+	m_instructionSet[0x88] = {2,nullptr,&cpu::DEY,"DEY",0x88};
+
+	//EOR
+	m_instructionSet[0x49] = {2,&cpu::IMM,&cpu::EOR,"EOR",0x49};
+	m_instructionSet[0x45] = {3,&cpu::ZP,&cpu::EOR,"EOR",0x45};
+	m_instructionSet[0x55] = {4,&cpu::ZPX,&cpu::EOR,"EOR",0x55};
+	m_instructionSet[0x4D] = {4,&cpu::ABS,&cpu::EOR,"EOR",0x4D};
+	m_instructionSet[0x5D] = {4,&cpu::ABX,&cpu::EOR,"EOR",0x5D};
+	m_instructionSet[0x59] = {4,&cpu::ABY,&cpu::EOR,"EOR",0x59};
+	m_instructionSet[0x41] = {6,&cpu::INDX,&cpu::EOR,"EOR",0x41};
+	m_instructionSet[0x51] = {5,&cpu::INDY,&cpu::EOR,"EOR",0x51};
+
+
+	
+	//INC
+	m_instructionSet[0xE6] = {5,&cpu::ZP,&cpu::INC,"INC",0xE6};
+	m_instructionSet[0xF6] = {6,&cpu::ZPX,&cpu::INC,"INC",0xF6};
+	m_instructionSet[0xEE] = {6,&cpu::ABS,&cpu::INC,"INC",0xEE};
+	m_instructionSet[0xFE] = {7,&cpu::ABX,&cpu::INC,"INC",0xFE};
+
+	//INX
+	m_instructionSet[0xE8] = {2,nullptr,&cpu::INX,"INX",0xE8};
+
+	//INY
+	m_instructionSet[0xC8] = {2,nullptr,&cpu::INY,"INY",0xC8};
+
+	//JMP
+	m_instructionSet[0x4C] = {3,&cpu::ABS,&cpu::JMP,"JMP",0x4C};
+	m_instructionSet[0x6C] = {5,&cpu::IND,&cpu::JMP,"JMP",0x6C};
+
+
+	//JSR
+	m_instructionSet[0x20] = {3,&cpu::ABS,&cpu::JSR,"JSR",0x20};
+
+	//LDA
 	m_instructionSet[0xA9] = {2,&cpu::IMM,&cpu::LDA,"LDA",0xA9};
 	m_instructionSet[0xA5] = {3,&cpu::ZP,&cpu::LDA,"LDA",0xA9};
 	m_instructionSet[0xB5] = {4,&cpu::ZPX,&cpu::LDA,"LDA",0xA9};
 	m_instructionSet[0xAD] = {4,&cpu::ABS,&cpu::LDA,"LDA",0xA9};
-	m_instructionSet[0x4C] = {2,&cpu::ABS,&cpu::JMP,"JMP",0xA9};
+	m_instructionSet[0xBD] = {4,&cpu::ABX,&cpu::LDA,"LDA",0xBD};
+	m_instructionSet[0xB9] = {4,&cpu::ABY,&cpu::LDA,"LDA",0xB9};
+	m_instructionSet[0xA1] = {6,&cpu::INDX,&cpu::LDA,"LDA",0xA1};
+	m_instructionSet[0xB1] = {5,&cpu::INDY,&cpu::LDA,"LDA",0xB1};
+
+	//PHA
 	m_instructionSet[0x48] = {2,nullptr,&cpu::PHA,"PHA",0xA9};
 }
 
