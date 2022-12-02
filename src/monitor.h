@@ -55,7 +55,7 @@ public:
 			command = split(str, " ");
 
 			if (command[0] == "exit") {
-				return;
+				exit(0);
 			}
 			else if (command[0] == "hd") {
 				WORD start = std::stoul(command[1], nullptr, 16);
@@ -64,6 +64,11 @@ public:
 			}
 			else if(command[0] == "step"){
 				step();
+			}else if(command[0] == "run"){
+				int num = std::stoi(command[1]);
+				for(int i = 0 ;i<num;i++){
+					step();
+				}
 			}
 			else if(command[0] == "a"){
 				std::cout<<"REG_A : "<<HEX(processor->reg_a)<<std::endl;

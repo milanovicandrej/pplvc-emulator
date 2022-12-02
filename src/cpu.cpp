@@ -3,8 +3,6 @@
 using BYTE = unsigned char;
 using WORD = unsigned short;
 
-void cpu::NOP(){ return ;}
-
 void cpu::LDA(){
 	reg_a = current_data;
 	if(reg_a == 0x00)
@@ -389,7 +387,7 @@ void cpu::BRK(){
 	if(reg_sp > 0x00)
 		reg_sp--;
 	
-	bus->writeByte(0x0100 + reg_sp,lo);
+	bus->writeByte(0x0100 + reg_sp,hi);
 	if(reg_sp > 0x00)
 		reg_sp--;
 
@@ -471,7 +469,7 @@ void cpu::initInsSet(){
 	//BCS
 	m_instructionSet[0xB0] = {2,&cpu::REL,&cpu::BCS,"BCS",0xB0};
 	//BEQ
-	m_instructionSet[0xF0] = {2,&cpu::REL,&cpu::BCS,"BCS",0xF0};
+	m_instructionSet[0xF0] = {2,&cpu::REL,&cpu::BEQ,"BEQ",0xF0};
 	//BIT
 	m_instructionSet[0x24] = {2,&cpu::ZP,&cpu::BIT,"BIT",0x24};
 	m_instructionSet[0x2C] = {2,&cpu::ABS,&cpu::BIT,"BIT",0x2C};
@@ -564,16 +562,67 @@ void cpu::initInsSet(){
 
 	//LDA
 	m_instructionSet[0xA9] = {2,&cpu::IMM,&cpu::LDA,"LDA",0xA9};
-	m_instructionSet[0xA5] = {3,&cpu::ZP,&cpu::LDA,"LDA",0xA9};
-	m_instructionSet[0xB5] = {4,&cpu::ZPX,&cpu::LDA,"LDA",0xA9};
-	m_instructionSet[0xAD] = {4,&cpu::ABS,&cpu::LDA,"LDA",0xA9};
+	m_instructionSet[0xA5] = {3,&cpu::ZP,&cpu::LDA,"LDA",0xA5};
+	m_instructionSet[0xB5] = {4,&cpu::ZPX,&cpu::LDA,"LDA",0xB5};
+	m_instructionSet[0xAD] = {4,&cpu::ABS,&cpu::LDA,"LDA",0xAD};
 	m_instructionSet[0xBD] = {4,&cpu::ABX,&cpu::LDA,"LDA",0xBD};
 	m_instructionSet[0xB9] = {4,&cpu::ABY,&cpu::LDA,"LDA",0xB9};
 	m_instructionSet[0xA1] = {6,&cpu::INDX,&cpu::LDA,"LDA",0xA1};
 	m_instructionSet[0xB1] = {5,&cpu::INDY,&cpu::LDA,"LDA",0xB1};
 
+	//LDX
+	m_instructionSet[0xA2] = {2,&cpu::IMM,&cpu::LDX,"LDX",0xA2};
+	m_instructionSet[0xA6] = {3,&cpu::ZP,&cpu::LDX,"LDX",0xA6};
+	m_instructionSet[0xB6] = {4,&cpu::ZPY,&cpu::LDX,"LDX",0xB6};
+	m_instructionSet[0xAE] = {4,&cpu::ABS,&cpu::LDX,"LDX",0xAE};
+	m_instructionSet[0xBE] = {4,&cpu::ABY,&cpu::LDX,"LDX",0xBE};
+
+	//LDY
+	m_instructionSet[0xA0] = {2,&cpu::IMM,&cpu::LDY,"LDY",0xA0};
+	m_instructionSet[0xA4] = {3,&cpu::ZP,&cpu::LDY,"LDY",0xA4};
+	m_instructionSet[0xB4] = {4,&cpu::ZPY,&cpu::LDY,"LDY",0xB4};
+	m_instructionSet[0xAC] = {4,&cpu::ABS,&cpu::LDY,"LDY",0xAC};
+	m_instructionSet[0xBC] = {4,&cpu::ABY,&cpu::LDY,"LDY",0xBC};
+
+	//LSR
+	m_instructionSet[0x4A] = {2,nullptr,&cpu::LSR_A,"LSR",0x4A};
+	m_instructionSet[0x46] = {5,&cpu::ZP,&cpu::LSR,"LSR",0x46};
+	m_instructionSet[0x56] = {6,&cpu::ZPX,&cpu::LSR,"LSR",0x56};
+	m_instructionSet[0x4E] = {6,&cpu::ABS,&cpu::LSR,"LSR",0x4E};
+	m_instructionSet[0x5E] = {7,&cpu::ABX,&cpu::LSR,"LSR",0x5E};
+
+	//NOP
+	m_instructionSet[0xEA] = {2,nullptr,&cpu::NOP,"NOP",0xEA};
+
+	//ORA
+	m_instructionSet[0x09] = {2,&cpu::IMM,&cpu::ORA,"ORA",0x09};
+	m_instructionSet[0x05] = {3,&cpu::ZP,&cpu::ORA,"ORA",0x05};
+	m_instructionSet[0x15] = {4,&cpu::ZPX,&cpu::ORA,"ORA",0x15};
+	m_instructionSet[0x0D] = {4,&cpu::ABS,&cpu::ORA,"ORA",0x0D};
+	m_instructionSet[0x1D] = {4,&cpu::ABX,&cpu::ORA,"ORA",0x1D};
+	m_instructionSet[0x19] = {4,&cpu::ABY,&cpu::ORA,"ORA",0x19};
+	m_instructionSet[0x01] = {6,&cpu::INDX,&cpu::ORA,"ORA",0x01};
+	m_instructionSet[0x11] = {5,&cpu::INDY,&cpu::ORA,"ORA",0x11};
+
 	//PHA
-	m_instructionSet[0x48] = {2,nullptr,&cpu::PHA,"PHA",0xA9};
+	m_instructionSet[0x48] = {3,nullptr,&cpu::PHA,"PHA",0x48};
+	//PHP
+	m_instructionSet[0x08] = {3,nullptr,&cpu::PHP,"PHP",0x08};
+	//PLA
+	m_instructionSet[0x68] = {4,nullptr,&cpu::PLA,"PLA",0x68};
+	//PLP
+	m_instructionSet[0x28] = {2,nullptr,&cpu::PLP,"PLP",0x28};
+
+	//ROL
+	m_instructionSet[0x2A] = {2,nullptr,&cpu::ROL_A,"ROL",0x2A};
+	m_instructionSet[0x26] = {5,&cpu::ZP,&cpu::ROL,"ROL",0x26};
+	m_instructionSet[0x36] = {6,&cpu::ZPX,&cpu::ROL,"ROL",0x36};
+	m_instructionSet[0x2E] = {6,&cpu::ABS,&cpu::ROL,"ROL",0x2E};
+	m_instructionSet[0x3E] = {7,&cpu::ABX,&cpu::ROL,"ROL",0x3E};
+
+	//STA
+	m_instructionSet[0x9D] = {4,&cpu::ABX,&cpu::STA,"STA",0x9D};
+
 }
 
 //execute one instruction

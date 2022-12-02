@@ -157,6 +157,7 @@ public:
 
 		void REL(){
 			BYTE offset = bus->fetchByte(reg_pc);
+			reg_pc++;
 			current_data = offset;
 		}
 
