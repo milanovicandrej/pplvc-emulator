@@ -17,7 +17,7 @@ This is a an emulator of a theoretical computer based on the 6502 cpu architectu
 - Basic software for interaction
 
 ## How To:
- - Install the latest gcc compile and run make
+ - Install the latest gcc compiler and run make
 
 ## Roadmap:
  - Improve video card efficiency
